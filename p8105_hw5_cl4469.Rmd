@@ -1,0 +1,40 @@
+---
+title: "p8105_hw5_cl4469"
+author: "Chen Liang"
+date: "2023-11-12"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(patchwork)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "95%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = 'bottom'))
+
+options(
+  ggplot2.continuous.colour = 'viridis',
+  ggplot2.continuous.fill = 'viridis'
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+# Problem 1
+```{r, load data}
+homicide_df = read.csv("data/homicide-data.csv")
+```
+This dataset contains `r nrow(homicide_df)` rows and `r ncol(homicide_df)` columns, with each row resprenting a single event occurred. Variables include id, reported-date, victims'last name,race, and sex. It contains the location of the killing (city, state, latitude, longitude) and whether an arrest was made. Moreover, there are some missing values in `lat` and `lon` columns and unknown information in `victim_last`,`victim_first`,`victim_age`,`victim_sex`, and `victim_race`.
+
+
+```{r}
+
+```
+
+
