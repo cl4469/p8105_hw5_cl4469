@@ -32,9 +32,23 @@ homicide_df = read.csv("data/homicide-data.csv")
 ```
 This dataset contains `r nrow(homicide_df)` rows and `r ncol(homicide_df)` columns, with each row resprenting a single event occurred. Variables include id, reported-date, victims'last name,race, and sex. It contains the location of the killing (city, state, latitude, longitude) and whether an arrest was made. Moreover, there are some missing values in `lat` and `lon` columns and unknown information in `victim_last`,`victim_first`,`victim_age`,`victim_sex`, and `victim_race`.
 
-
 ```{r}
+hom_summary = homicide_df|>
+  mutate(
+    city_state = str_c(city, state, sep = "_"),
+    resolved = case_when(
+      disposition == "Closed without arrest" ~ "unsolved",
+      disposition == "Open/No arrest"        ~ "unsolved",
+      disposition == "Closed by arrest"      ~ "solved",
+    )) |>
+  group_by(city_state) |>
+  summarize(
+    hom_total = n(),
+    hom_unsolved = sum(resolved == "unsolved"),
+    home_solved = sum(resolved == "solved")
+  )
 
+hom_summary
 ```
 
 
