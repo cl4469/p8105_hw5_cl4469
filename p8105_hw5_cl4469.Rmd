@@ -35,7 +35,7 @@ This dataset contains `r nrow(homicide_df)` rows and `r ncol(homicide_df)` colum
 ```{r}
 hom_summary = homicide_df|>
   mutate(
-    city_state = str_c(city, state, sep = "_"),
+    city_state = str_c(city, state, sep = ","),
     resolved = case_when(
       disposition == "Closed without arrest" ~ "unsolved",
       disposition == "Open/No arrest"        ~ "unsolved",
@@ -51,4 +51,20 @@ hom_summary = homicide_df|>
 hom_summary
 ```
 
+```{r,prop test for Baltimore,MD}
+res_tidy = prop.test(
+  hom_summary |>filter(city_state == "Baltimore,MD") |> pull(hom_unsolved), 
+  hom_summary |>filter(city_state == "Baltimore,MD") |> pull(hom_total)) |>
+  broom::tidy(res_tidy)
+
+save(res_tidy, file = "result/prop_test_MD.RData")
+```
+
+Pull the estimated proportion and confidence intervals from the resulting tidy dataframe
+```{r}
+estimated_prop=pull(res_tidy, estimate)
+ci=paste("(", pull(res_tidy, conf.low),",", pull(res_tidy, conf.high),")")
+```
+
+```{r}
 
