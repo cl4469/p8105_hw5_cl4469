@@ -7,6 +7,8 @@ output: github_document
 
 ```{r}
 library(tidyverse)
+library(purrr)
+library(broom)
 library(patchwork)
 
 knitr::opts_chunk$set(
@@ -28,7 +30,7 @@ scale_fill_discrete = scale_fill_viridis_d
 
 # Problem 1
 ```{r, load data}
-homicide_df = read.csv("data/homicide-data.csv")
+homicide_df = read.csv("hw5_data/homicide-data.csv")
 ```
 This dataset contains `r nrow(homicide_df)` rows and `r ncol(homicide_df)` columns, with each row resprenting a single event occurred. Variables include id, reported-date, victims'last name,race, and sex. It contains the location of the killing (city, state, latitude, longitude) and whether an arrest was made. Moreover, there are some missing values in `lat` and `lon` columns and unknown information in `victim_last`,`victim_first`,`victim_age`,`victim_sex`, and `victim_race`.
 
@@ -66,11 +68,6 @@ estimated_prop=pull(res_tidy, estimate)
 ci=paste("(", pull(res_tidy, conf.low),",", pull(res_tidy, conf.high),")")
 ```
 
-```{r define fxn}
-
-```
-
-
 ```{r,make a plot}
 results_df = 
   hom_summary %>% 
@@ -93,4 +90,33 @@ results_df %>%
 ```
 
 # Problem 2
+First, we create a dataframe and read in data for each subject.
+```{r}
+file_name =
+  list.files("hw5_data/data/", full.names = TRUE)
 
+prob2_df= file_name |>
+  map_dfr(read_csv)|>
+  bind_cols(name = file_name)
+```
+
+Next, we tidy the result.
+```{r}
+tidy_prob2_df =
+  prob2_df|> 
+  mutate(arm = 
+           case_when(
+             str_detect(name, "con") ~ "control",
+             str_detect(name, "exp") ~ "experimental"),
+         id = str_sub(name, 20, 21)
+         ) |>
+  pivot_longer(week_1:week_8,
+               names_to = "week",
+               values_to = "observations",
+               names_prefix = "week_") |> 
+  mutate(week = as.numeric(week))|>
+  select(id, arm, week, observations)
+```
+
+Make a spaghetti plot showing observations on each subject over time.
+```{r}
