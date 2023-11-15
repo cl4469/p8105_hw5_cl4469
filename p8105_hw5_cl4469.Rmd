@@ -132,5 +132,68 @@ Comment:
 From the spaghetti plot, the data values of the experimental group seem to be generally greater than those of the control group. We also observe a gentle variation in values over time within the control arm, whereas the experimental arm consistently demonstrates higher values than those in the control arm, with a tendency to increase over time.
 
 # Problem 3
+Fix n=30
+Fix σ=5
+```{r}
+t_test = function(mu, n = 30, sigma = 5) {
+  
+  sim_data = tibble(
+    x = rnorm(n, mean = mu, sd = sigma)
+    )
+  
+  sim_result = broom::tidy(t.test(sim_data))
+  sim_result |> 
+    dplyr::select(estimate, p.value)
+}
 
+sim_results_df = 
+  expand_grid(
+    mu = 0,
+    iter = 1:5000
+    )|>
+  mutate(
+    estimate_df = map(mu, t_test)
+    ) |> 
+  unnest(estimate_df) |>
+  rename("p_value" = "p.value")
+
+sim_results_df
+```
+
+Repeat the above for mu=1,2,3,4,5,6, and complete the following:
+```{r}
+new_results_df = 
+  expand_grid(
+    mu = c(1,2,3,4,5,6),
+    iter = 1:5000
+  ) |> 
+  mutate(
+    estimate_df = map(mu, t_test)
+  ) |> 
+  unnest(estimate_df) |>
+  rename("p_value" = "p.value")
+
+```
+
+Make a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of μ on the x axis
+```{r}
+all_result_df= bind_rows(sim_results_df, new_results_df)
+
+power_df =
+  all_result_df |> 
+  mutate(reject = case_when(
+    p_value > 0.05 ~ FALSE,
+    p_value < 0.05 ~ TRUE
+  )) |> 
+  group_by(mu) |> 
+  summarise(count = sum(reject)) |> 
+  mutate(prop_rejext = count / 5000)
+
+power_df |> 
+  ggplot(aes(x = mu, y = prop_rejext)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Proportiobn of Rejected Hypotheses for each Mu",
+       x = "True Value of Mu", y = "Proportion Rejected")
+```
 
